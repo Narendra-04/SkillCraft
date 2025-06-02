@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Enhanced Image Encryption Tool</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f0f0;
+      text-align: center;
+      padding: 20px;
+    }
+    .container {
+      background: #fff;
+      padding: 20px;
+      max-width: 700px;
+      margin: auto;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    canvas {
+      margin-top: 20px;
+      border: 1px solid #ccc;
+      max-width: 100%;
+    }
+    input, button, select {
+      margin: 10px;
+      padding: 10px 15px;
+      font-size: 16px;
+    }
+    button {
+      cursor: pointer;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    label {
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>🔐 Enhanced Image Encryption Tool</h2>
+
+    <input type="file" id="upload" accept="image/*" />
+    <br />
+
+    <label for="method">Choose Encryption Method:</label>
+    <select id="method">
+      <option value="swapRGB">Swap Red ↔ Blue & Add to Green</option>
+      <option value="invert">Invert Colors</option>
+      <option value="brightness">Increase Brightness</option>
+    </select>
+    <br />
+
+    <button onclick="encrypt()">Encrypt</button>
+    <button onclick="decrypt()">Decrypt</button>
+    <button onclick="downloadImage()">Download Image</button>
+
+    <canvas id="canvas"></canvas>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    let originalImageData = null;
+
+    document.getElementById("upload").addEventListener("change", function(e) {
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        const img = new Image();
+        img.onload = function() {
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx.drawImage(img, 0, 0);
+          originalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(e.target.files[0]);
+    });
+
+    function encrypt() {
+      if (!originalImageData) return alert("Please upload an image first.");
+      const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const method = document.getElementById("method").value;
+
+      for (let i = 0; i < data.data.length; i += 4) {
+        let r = data.data[i];
+        let g = data.data[i + 1];
+        let b = data.data[i + 2];
+
+        switch (method) {
+          case "swapRGB":
+            data.data[i] = b;
+            data.data[i + 1] = (g + 20) % 256;
+            data.data[i + 2] = r;
+            break;
+          case "invert":
+            data.data[i] = 255 - r;
+            data.data[i + 1] = 255 - g;
+            data.data[i + 2] = 255 - b;
+            break;
+          case "brightness":
+            data.data[i] = Math.min(r + 40, 255);
+            data.data[i + 1] = Math.min(g + 40, 255);
+            data.data[i + 2] = Math.min(b + 40, 255);
+            break;
+        }
+      }
+      ctx.putImageData(data, 0, 0);
+    }
+
+    function decrypt() {
+      if (!originalImageData) return alert("Please upload an image first.");
+      ctx.putImageData(originalImageData, 0, 0); // Restore original
+    }
+
+    function downloadImage() {
+      const link = document.createElement("a");
+      link.download = "encrypted-image.png";
+      link.href = canvas.toDataURL();
+      link.click();
+    }
+  </script>
+</body>
+</html>
