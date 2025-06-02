@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Caesar Cipher Encrypt/Decrypt</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f1f1f1;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 500px;
+      margin: auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    input, textarea, button {
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      font-size: 16px;
+    }
+    button {
+      cursor: pointer;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .output {
+      background: #eee;
+      padding: 10px;
+      margin-top: 10px;
+      min-height: 40px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Caesar Cipher Encrypt & Decrypt</h2>
+    <label for="message">Enter Message:</label>
+    <textarea id="message" rows="4" placeholder="Type your message..."></textarea>
+    
+    <label for="shift">Enter Shift Value:</label>
+    <input type="number" id="shift" placeholder="e.g. 3" />
+    
+    <button onclick="encrypt()">Encrypt</button>
+    <button onclick="decrypt()">Decrypt</button>
+    
+    <h3>Output:</h3>
+    <div class="output" id="result"></div>
+  </div>
+
+  <script>
+    function caesarCipher(str, shift, isEncrypt = true) {
+      shift = (isEncrypt ? shift : -shift) % 26;
+      let result = '';
+
+      for (let i = 0; i < str.length; i++) {
+        let char = str[i];
+        if (char.match(/[a-z]/i)) {
+          let code = str.charCodeAt(i);
+          let base = (code >= 65 && code <= 90) ? 65 : 97;
+          result += String.fromCharCode(((code - base + shift + 26) % 26) + base);
+        } else {
+          result += char;
+        }
+      }
+      return result;
+    }
+
+    function encrypt() {
+      const message = document.getElementById("message").value;
+      const shift = parseInt(document.getElementById("shift").value);
+      if (isNaN(shift)) return alert("Please enter a valid shift value.");
+      const encrypted = caesarCipher(message, shift, true);
+      document.getElementById("result").innerText = encrypted;
+    }
+
+    function decrypt() {
+      const message = document.getElementById("message").value;
+      const shift = parseInt(document.getElementById("shift").value);
+      if (isNaN(shift)) return alert("Please enter a valid shift value.");
+      const decrypted = caesarCipher(message, shift, false);
+      document.getElementById("result").innerText = decrypted;
+    }
+  </script>
+</body>
+</html>
+
